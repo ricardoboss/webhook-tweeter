@@ -23,9 +23,6 @@ use ricardoboss\WebhookTweeter\WebhookTweeterHandler;
 // 1. Create a config object
 // you can also pass \Stringable objects instead of strings
 $config = new WebhookTweeterConfig(
-    'bearer_token',
-    'consumer_key',
-    'consumer_secret',
     'webhook_url',
     'webhook_secret' // nullable
 );

@@ -3,32 +3,23 @@ declare(strict_types=1);
 
 namespace ricardoboss\WebhookTweeter;
 
-use Coderjerk\BirdElephant\BirdElephant;
-use Coderjerk\BirdElephant\Compose\Tweet;
 use JsonException;
 use Psr\Http\Message\RequestInterface;
 
 class WebhookTweeterHandler
 {
-	private readonly BirdElephant $twitter;
-
 	public function __construct(
 		private readonly WebhookTweeterConfig $config,
 		private readonly WebhookTweeterRenderer $renderer,
 		private readonly WebhookTweeterTemplateLocator $templateLocator,
+		private readonly WebhookTweeterTwitterAPI $twitter,
 	)
 	{
-		$this->twitter = new BirdElephant([
-			'bearer_token' => (string) $this->config->bearerToken,
-			'consumer_key' => (string) $this->config->consumerKey,
-			'consumer_secret' => (string) $this->config->consumerSecret,
-		]);
 	}
 
 	/**
 	 * @param RequestInterface $request
 	 * @return WebhookTweeterResult
-	 * @throws JsonException
 	 */
 	public function handle(RequestInterface $request): WebhookTweeterResult
 	{
@@ -44,27 +35,37 @@ class WebhookTweeterHandler
 			return new WebhookTweeterResult(false, 'Invalid request path', null, null);
 		}
 
-		if (!$this->verifySignature($request)) {
-			return new WebhookTweeterResult(false, 'Invalid request secret', null, null);
+		$body = $request->getBody()->getContents();
+
+		if (!$this->verifySignature($request, $body)) {
+			return new WebhookTweeterResult(false, 'Invalid request signature', null, null);
 		}
 
-		$payload = $this->getPayload($request);
+		try {
+			$payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+		} catch (JsonException) {
+			return new WebhookTweeterResult(false, 'Invalid request payload', null, null);
+		}
+
 		$renderedTemplate = $this->renderTemplate($payload);
-		$tweet = $this->sendTweet($renderedTemplate);
+		$tweet = $this->twitter->sendTweet($renderedTemplate);
 		$url = $this->getTweetUrl($tweet);
 
 		return new WebhookTweeterResult(true, null, $url, $tweet);
 	}
 
-	private function verifySignature(RequestInterface $request): bool
+	private function verifySignature(RequestInterface $request, string $body): bool
 	{
 		if ($this->config->webhookSecret === null) {
 			return true;
 		}
 
-		$body = $request->getBody()->getContents();
+		$signature = $request->getHeaderLine('X-Hub-Signature');
+		if (!str_starts_with($signature, 'sha256=')) {
+			return false;
+		}
 
-		$signature = $request->getHeaderLine('X-Hub-Signature-256');
+		$signature = substr($signature, 7);
 
 		$hash = hash_hmac('sha256', $body, $this->config->webhookSecret);
 
@@ -76,23 +77,6 @@ class WebhookTweeterHandler
 		$template = $this->templateLocator->getMatchingTemplate($payload['event']) ?? $this->templateLocator->getDefaultTemplate();
 
 		return $this->renderer->render($template, $payload);
-	}
-
-	/**
-	 * @throws JsonException
-	 */
-	private function getPayload(RequestInterface $request): array
-	{
-		$body = $request->getBody()->getContents();
-
-		return json_decode($body, true, flags: JSON_THROW_ON_ERROR);
-	}
-
-	private function sendTweet(string $text): object
-	{
-		$tweet = (new Tweet)->text($text);
-
-		return $this->twitter->tweets()->tweet($tweet);
 	}
 
 	private function getTweetUrl(object $tweet): string
