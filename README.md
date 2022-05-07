@@ -26,6 +26,7 @@ $config = new WebhookTweeterConfig(
     'bearer_token',
     'consumer_key',
     'consumer_secret',
+    'webhook_url',
     'webhook_secret' // nullable
 );
 
