@@ -19,6 +19,7 @@ use ricardoboss\WebhookTweeter\WebhookTweeterConfig;
 use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterRenderer;
 use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterTemplateLocator;
 use ricardoboss\WebhookTweeter\WebhookTweeterHandler;
+use ricardoboss\WebhookTweeter\API\BirdElephantTwitterAPI;
 
 // 1. Create a config object
 // you can also pass \Stringable objects instead of strings
@@ -35,13 +36,23 @@ $renderer = new SimpleWebhookTweeterRenderer();
 // the simple locator looks for files in the given directory and the given extension (name is passed to the getMatchingTemplate method)
 $locator = new SimpleWebhookTweeterTemplateLocator(__DIR__ . '/templates', '.md');
 
-// 4. Create a WebhookTweeterHandler instance
-$handler = new WebhookTweeterHandler($config, $renderer, $locator);
+// 4. Create a Twitter API client implementing WebhookTweeterTwitterAPI
+$twitter = new BirdElephantTwitterAPI();
+$twitter->setCredentials([
+    'bearer_token' => xxxxxx, // OAuth 2.0 Bearer Token requests
+    'consumer_key' => xxxxxx, // identifies your app, always needed
+    'consumer_secret' => xxxxxx, // app secret, always needed
+    'token_identifier' => xxxxxx, // OAuth 1.0a User Context requests
+    'token_secret' => xxxxxx, // OAuth 1.0a User Context requests
+]);
 
-// 5. Get a PSR-7 request object
+// 5. Create a WebhookTweeterHandler instance
+$handler = new WebhookTweeterHandler($config, $renderer, $locator, $twitter);
+
+// 6. Get a PSR-7 request object
 $request = /* get your request implementation */;
 
-// 6. Handle the request (sends a rendered tweet)
+// 7. Handle the request (sends a rendered tweet)
 $result $handler->handle($request);
 ```
 
