@@ -8,6 +8,9 @@ use Psr\Http\Message\RequestInterface;
 
 class WebhookTweeterHandler
 {
+	public const SignatureHeader = 'X-Hub-Signature-256';
+	public const SignatureAlgorithm = 'sha256';
+
 	public function __construct(
 		private readonly WebhookTweeterConfig $config,
 		private readonly WebhookTweeterRenderer $renderer,
@@ -47,6 +50,10 @@ class WebhookTweeterHandler
 			return new WebhookTweeterResult(false, 'Invalid request payload', null, null);
 		}
 
+		if (!isset($payload['event'])) {
+			return new WebhookTweeterResult(false, 'Missing \'event\' key in payload', null, null);
+		}
+
 		$renderedTemplate = $this->renderTemplate($payload);
 		$tweet = $this->twitter->sendTweet($renderedTemplate);
 		$url = $this->getTweetUrl($tweet);
@@ -60,14 +67,14 @@ class WebhookTweeterHandler
 			return true;
 		}
 
-		$signature = $request->getHeaderLine('X-Hub-Signature');
-		if (!str_starts_with($signature, 'sha256=')) {
+		$signature = $request->getHeaderLine(self::SignatureHeader);
+		if (!str_starts_with($signature, self::SignatureAlgorithm . '=')) {
 			return false;
 		}
 
-		$signature = substr($signature, 7);
+		$signature = substr($signature, strlen(self::SignatureAlgorithm) + 1);
 
-		$hash = hash_hmac('sha256', $body, $this->config->webhookSecret);
+		$hash = hash_hmac(self::SignatureAlgorithm, $body, $this->config->webhookSecret);
 
 		return hash_equals($hash, $signature);
 	}

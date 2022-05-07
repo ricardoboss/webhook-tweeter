@@ -54,7 +54,7 @@ class WebhookTweeterHandlerTest extends TestCase
 			->createRequest('POST', 'https://example.com' . $config->webhookPath)
 			->withHeader('Content-Type', 'application/json')
 			->withBody($factory->createStream($testDataJson))
-			->withHeader('X-Hub-Signature', 'sha256=' . hash_hmac('sha256', $testDataJson, $config->webhookSecret));
+			->withHeader(WebhookTweeterHandler::SignatureHeader, WebhookTweeterHandler::SignatureAlgorithm . '=' . hash_hmac(WebhookTweeterHandler::SignatureAlgorithm, $testDataJson, $config->webhookSecret));
 		$successResult = new WebhookTweeterResult(true, null, $testTweetUrl, $testTweetObject);
 
 		$testDataWithTemplateData = [
@@ -64,7 +64,7 @@ class WebhookTweeterHandlerTest extends TestCase
 		$testDataWithTemplateDataJson = json_encode($testDataWithTemplateData, JSON_THROW_ON_ERROR);
 		$baseRequestWithData = $baseRequest
 			->withBody($factory->createStream($testDataWithTemplateDataJson))
-			->withHeader('X-Hub-Signature', 'sha256=' . hash_hmac('sha256', $testDataWithTemplateDataJson, $config->webhookSecret))
+			->withHeader(WebhookTweeterHandler::SignatureHeader, WebhookTweeterHandler::SignatureAlgorithm . '=' . hash_hmac(WebhookTweeterHandler::SignatureAlgorithm, $testDataWithTemplateDataJson, $config->webhookSecret))
 		;
 
 		$twitter
@@ -129,7 +129,7 @@ class WebhookTweeterHandlerTest extends TestCase
 			'expected' => $invalidPathResult,
 		];
 
-		$invalidSecretRequest = $baseRequest->withHeader('X-Hub-Signature', 'not-the-signature');
+		$invalidSecretRequest = $baseRequest->withHeader(WebhookTweeterHandler::SignatureHeader, 'not-the-signature');
 		$invalidSecretResult = new WebhookTweeterResult(false, 'Invalid request signature', null, null);
 
 		yield [
@@ -155,7 +155,7 @@ class WebhookTweeterHandlerTest extends TestCase
 
 		$invalidContentRequest = $baseRequest
 			->withBody($factory->createStream('invalid-json'))
-			->withHeader('X-Hub-Signature', 'sha256=' . hash_hmac('sha256', 'invalid-json', $config->webhookSecret))
+			->withHeader(WebhookTweeterHandler::SignatureHeader, WebhookTweeterHandler::SignatureAlgorithm . '=' . hash_hmac(WebhookTweeterHandler::SignatureAlgorithm, 'invalid-json', $config->webhookSecret))
 		;
 		$invalidContentResult = new WebhookTweeterResult(false, 'Invalid request payload', null, null);
 
@@ -169,7 +169,7 @@ class WebhookTweeterHandlerTest extends TestCase
 		];
 
 		$configWithoutSecret = new WebhookTweeterConfig('/webhook');
-		$baseRequestWithoutSignature = $baseRequest->withoutHeader('X-Hub-Signature');
+		$baseRequestWithoutSignature = $baseRequest->withoutHeader(WebhookTweeterHandler::SignatureHeader);
 
 		yield [
 			'config' => $configWithoutSecret,
