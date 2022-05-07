@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ricardoboss\WebhookTweeter\Example;
+namespace Ricardoboss\WebhookTweeter\Simple;
 
 use Ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
 use Ricardoboss\WebhookTweeter\WebhookTweeterTemplateLocator;
