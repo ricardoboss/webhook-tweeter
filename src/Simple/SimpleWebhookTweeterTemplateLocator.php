@@ -5,6 +5,7 @@ namespace ricardoboss\WebhookTweeter\Simple;
 
 use ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
 use ricardoboss\WebhookTweeter\WebhookTweeterTemplateLocator;
+use RuntimeException;
 
 class SimpleWebhookTweeterTemplateLocator implements WebhookTweeterTemplateLocator
 {
@@ -28,6 +29,6 @@ class SimpleWebhookTweeterTemplateLocator implements WebhookTweeterTemplateLocat
 
 	public function getDefaultTemplate(): WebhookTweeterTemplate
 	{
-		return new SimpleWebhookTweeterTemplate($this->templatesDirectory . '/default' . $this->templateExtension);
+		throw new RuntimeException('No default template available');
 	}
 }
