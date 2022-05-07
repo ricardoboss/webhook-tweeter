@@ -9,6 +9,7 @@ class WebhookTweeterResult
 		public readonly bool $success,
 		public readonly ?string $message,
 		public readonly ?string $url,
+		public readonly ?object $tweet,
 	)
 	{
 	}

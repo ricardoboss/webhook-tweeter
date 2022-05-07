@@ -32,34 +32,28 @@ class WebhookTweeterHandler
 	 */
 	public function handle(RequestInterface $request): WebhookTweeterResult
 	{
-		if (!$this->matchesWebhookFormat($request)) {
-			return new WebhookTweeterResult(false, 'Invalid request format', null);
+		if ($request->getMethod() !== 'POST') {
+			return new WebhookTweeterResult(false, 'Invalid request method', null, null);
+		}
+
+		if ($request->getHeaderLine('Content-Type') !== 'application/json') {
+			return new WebhookTweeterResult(false, 'Invalid request content type', null, null);
+		}
+
+		if ($request->getUri()->getPath() !== $this->config->webhookPath) {
+			return new WebhookTweeterResult(false, 'Invalid request path', null, null);
 		}
 
 		if (!$this->verifySignature($request)) {
-			return new WebhookTweeterResult(false, 'Invalid request secret', null);
+			return new WebhookTweeterResult(false, 'Invalid request secret', null, null);
 		}
 
 		$payload = $this->getPayload($request);
 		$renderedTemplate = $this->renderTemplate($payload);
 		$tweet = $this->sendTweet($renderedTemplate);
-
 		$url = $this->getTweetUrl($tweet);
 
-		return new WebhookTweeterResult(true, null, $tweet->url);
-	}
-
-	private function matchesWebhookFormat(RequestInterface $request): bool
-	{
-		if ($request->getMethod() !== 'POST') {
-			return false;
-		}
-
-		if ($request->getHeaderLine('Content-Type') !== 'application/json') {
-			return false;
-		}
-
-		return true;
+		return new WebhookTweeterResult(true, null, $url, $tweet);
 	}
 
 	private function verifySignature(RequestInterface $request): bool
@@ -77,7 +71,7 @@ class WebhookTweeterHandler
 		return hash_equals($hash, $signature);
 	}
 
-	public function renderTemplate(array $payload): string
+	private function renderTemplate(array $payload): string
 	{
 		$template = $this->templateLocator->getMatchingTemplate($payload['event']) ?? $this->templateLocator->getDefaultTemplate();
 

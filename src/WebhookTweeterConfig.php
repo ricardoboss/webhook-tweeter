@@ -11,7 +11,7 @@ class WebhookTweeterConfig
 		public string|Stringable $bearerToken,
 		public string|Stringable $consumerKey,
 		public string|Stringable $consumerSecret,
-		public string|Stringable $webhookUrl,
+		public string|Stringable $webhookPath,
 		public string|Stringable|null $webhookSecret = null,
 	)
 	{
