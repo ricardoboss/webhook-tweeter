@@ -15,10 +15,10 @@ composer require ricardoboss/webhook-tweeter
 ```php
 <?php
 
-use Ricardoboss\WebhookTweeter\WebhookTweeterConfig;
-use Ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterRenderer;
-use Ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterTemplateLocator;
-use Ricardoboss\WebhookTweeter\WebhookTweeterHandler;
+use ricardoboss\WebhookTweeter\WebhookTweeterConfig;
+use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterRenderer;
+use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterTemplateLocator;
+use ricardoboss\WebhookTweeter\WebhookTweeterHandler;
 
 // 1. Create a config object
 // you can also pass \Stringable objects instead of strings

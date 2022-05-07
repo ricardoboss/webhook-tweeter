@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Ricardoboss\WebhookTweeter\Simple;
+namespace ricardoboss\WebhookTweeter\Simple;
 
-use Ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
+use ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
 
 class SimpleWebhookTweeterTemplate implements WebhookTweeterTemplate
 {

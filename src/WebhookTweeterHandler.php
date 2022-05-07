@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ricardoboss\WebhookTweeter;
+namespace ricardoboss\WebhookTweeter;
 
 use Coderjerk\BirdElephant\BirdElephant;
 use Coderjerk\BirdElephant\Compose\Tweet;

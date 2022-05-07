@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Ricardoboss\WebhookTweeter\Simple;
+namespace ricardoboss\WebhookTweeter\Simple;
 
-use Ricardoboss\WebhookTweeter\WebhookTweeterRenderer;
-use Ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
+use ricardoboss\WebhookTweeter\WebhookTweeterRenderer;
+use ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
 
 class SimpleWebhookTweeterRenderer implements WebhookTweeterRenderer
 {
