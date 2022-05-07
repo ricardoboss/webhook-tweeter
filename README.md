@@ -56,6 +56,10 @@ The result has the following properties:
 - `$result->url`: a URL to the tweet
 - `$result->tweet`: the tweet object returned from the Twitter API
 
+## Credits
+
+Thanks to [danieldevine](https://github.com/danieldevine) for creating [BirdElephant](https://github.com/danieldevine/bird-elephant) and providing a neat PHP interface for the Twitter V2 API!
+
 ## License
 
 This project is licensed under the MIT license. Read more about it [here](./LICENSE).
