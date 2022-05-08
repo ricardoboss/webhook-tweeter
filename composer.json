@@ -1,5 +1,6 @@
 {
     "name": "ricardoboss/webhook-tweeter",
+    "description": "Validating and parsing of GitHub webhook requests and posting to Twitter",
     "license": "MIT",
     "type": "library",
     "authors": [
