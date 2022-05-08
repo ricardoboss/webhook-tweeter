@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fbea35b5404078d9c59205bf7eacf563",
+    "content-hash": "7f0bc56eb7ec22478b46411bb18b3282",
     "packages": [
         {
             "name": "coderjerk/bird-elephant",
-            "version": "dev-main",
+            "version": "v0.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/danieldevine/bird-elephant.git",
-                "reference": "57a29e4497f5d75ced819fb718372d1a3795b15f"
+                "reference": "81a9afd656df3a09bc216894260083c4e6667b7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/danieldevine/bird-elephant/zipball/57a29e4497f5d75ced819fb718372d1a3795b15f",
-                "reference": "57a29e4497f5d75ced819fb718372d1a3795b15f",
+                "url": "https://api.github.com/repos/danieldevine/bird-elephant/zipball/81a9afd656df3a09bc216894260083c4e6667b7c",
+                "reference": "81a9afd656df3a09bc216894260083c4e6667b7c",
                 "shasum": ""
             },
             "require": {
@@ -30,7 +30,6 @@
                 "symfony/var-dumper": "^5.1",
                 "vlucas/phpdotenv": "^5.2"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -50,7 +49,7 @@
             "description": "A simple library to request data from the Twitter APIv2 endpoints",
             "support": {
                 "issues": "https://github.com/danieldevine/bird-elephant/issues",
-                "source": "https://github.com/danieldevine/bird-elephant/tree/main"
+                "source": "https://github.com/danieldevine/bird-elephant/tree/v0.4.3"
             },
             "funding": [
                 {
@@ -58,7 +57,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-04-14T15:09:45+00:00"
+            "time": "2022-01-30T15:04:26+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -3070,9 +3069,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "coderjerk/bird-elephant": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
