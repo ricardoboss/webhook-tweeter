@@ -29,5 +29,8 @@
         "psr-4": {
             "ricardoboss\\WebhookTweeter\\": "test/"
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
