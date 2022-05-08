@@ -106,7 +106,7 @@ class WebhookTweeterHandlerTest extends TestCase
 		];
 
 		$invalidMethodRequest = $baseRequest->withMethod('GET');
-		$invalidMethodResult = new WebhookTweeterResult(false, 'Invalid request method', null, null);
+		$invalidMethodResult = new WebhookTweeterResult(false, 'Invalid request method: GET', null, null);
 
 		yield [
 			'config' => $config,
@@ -118,7 +118,7 @@ class WebhookTweeterHandlerTest extends TestCase
 		];
 
 		$invalidPathRequest = $baseRequest->withUri(new Uri('https://example.com/not-the-webhook-path'));
-		$invalidPathResult = new WebhookTweeterResult(false, 'Invalid request path', null, null);
+		$invalidPathResult = new WebhookTweeterResult(false, 'Invalid request path: /not-the-webhook-path', null, null);
 
 		yield [
 			'config' => $config,
@@ -142,7 +142,7 @@ class WebhookTweeterHandlerTest extends TestCase
 		];
 
 		$invalidContentTypeRequest = $baseRequest->withHeader('Content-Type', 'application/x-www-form-urlencoded');
-		$invalidContentTypeResult = new WebhookTweeterResult(false, 'Invalid request content type', null, null);
+		$invalidContentTypeResult = new WebhookTweeterResult(false, 'Invalid request content type: application/x-www-form-urlencoded', null, null);
 
 		yield [
 			'config' => $config,
@@ -157,7 +157,7 @@ class WebhookTweeterHandlerTest extends TestCase
 			->withBody($factory->createStream('invalid-json'))
 			->withHeader(WebhookTweeterHandler::SignatureHeader, WebhookTweeterHandler::SignatureAlgorithm . '=' . hash_hmac(WebhookTweeterHandler::SignatureAlgorithm, 'invalid-json', $config->webhookSecret))
 		;
-		$invalidContentResult = new WebhookTweeterResult(false, 'Invalid request payload', null, null);
+		$invalidContentResult = new WebhookTweeterResult(false, 'Invalid request payload: Syntax error', null, null);
 
 		yield [
 			'config' => $config,

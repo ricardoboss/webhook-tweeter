@@ -26,16 +26,19 @@ class WebhookTweeterHandler
 	 */
 	public function handle(RequestInterface $request): WebhookTweeterResult
 	{
-		if ($request->getMethod() !== 'POST') {
-			return new WebhookTweeterResult(false, 'Invalid request method', null, null);
+		$method = $request->getMethod();
+		if ($method !== 'POST') {
+			return new WebhookTweeterResult(false, "Invalid request method: $method", null, null);
 		}
 
-		if ($request->getHeaderLine('Content-Type') !== 'application/json') {
-			return new WebhookTweeterResult(false, 'Invalid request content type', null, null);
+		$contentType = $request->getHeaderLine('Content-Type');
+		if ($contentType !== 'application/json') {
+			return new WebhookTweeterResult(false, "Invalid request content type: $contentType", null, null);
 		}
 
-		if ($request->getUri()->getPath() !== $this->config->webhookPath) {
-			return new WebhookTweeterResult(false, 'Invalid request path', null, null);
+		$path = $request->getUri()->getPath();
+		if ($path !== $this->config->webhookPath) {
+			return new WebhookTweeterResult(false, "Invalid request path: $path", null, null);
 		}
 
 		$body = $request->getBody()->getContents();
@@ -46,12 +49,12 @@ class WebhookTweeterHandler
 
 		try {
 			$payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
-		} catch (JsonException) {
-			return new WebhookTweeterResult(false, 'Invalid request payload', null, null);
+		} catch (JsonException $e) {
+			return new WebhookTweeterResult(false, "Invalid request payload: " . $e->getMessage(), null, null);
 		}
 
 		if (!isset($payload['event'])) {
-			return new WebhookTweeterResult(false, 'Missing \'event\' key in payload', null, null);
+			return new WebhookTweeterResult(false, "Missing 'event' key in payload", null, null);
 		}
 
 		$renderedTemplate = $this->renderTemplate($payload);
