@@ -53,7 +53,7 @@ $handler = new WebhookTweeterHandler($config, $renderer, $locator, $twitter);
 $request = /* get your request implementation */;
 
 // 7. Handle the request (sends a rendered tweet)
-$result $handler->handle($request);
+$result = $handler->handle($request);
 ```
 
 The `$result` variable holds a `WebhookTweeterResult` instance.
