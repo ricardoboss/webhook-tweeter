@@ -11,7 +11,9 @@ use Psr\Http\Message\RequestInterface;
 use Mockery as M;
 use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterRenderer;
 use ricardoboss\WebhookTweeter\Simple\SimpleWebhookTweeterTemplateLocator;
+use RuntimeException;
 use stdClass;
+use Stringable;
 
 /**
  * @covers \ricardoboss\WebhookTweeter\WebhookTweeterHandler
@@ -168,6 +170,21 @@ class WebhookTweeterHandlerTest extends TestCase
 			'expected' => $invalidContentResult,
 		];
 
+		$missingKeyInContentRequest = $baseRequest
+			->withBody($factory->createStream('{"test":"data"}'))
+			->withHeader(WebhookTweeterHandler::SignatureHeader, WebhookTweeterHandler::SignatureAlgorithm . '=' . hash_hmac(WebhookTweeterHandler::SignatureAlgorithm, '{"test":"data"}', $config->webhookSecret))
+		;
+		$missingKeyInContentResult = new WebhookTweeterResult(false, "Missing 'event' key in payload", null, null);
+
+		yield [
+			'config' => $config,
+			'renderer' => $renderer,
+			'templateLocator' => $templateLocator,
+			'twitter' => $twitter,
+			'request' => $missingKeyInContentRequest,
+			'expected' => $missingKeyInContentResult,
+		];
+
 		$configWithoutSecret = new WebhookTweeterConfig('/webhook');
 		$baseRequestWithoutSignature = $baseRequest->withoutHeader(WebhookTweeterHandler::SignatureHeader);
 
@@ -179,11 +196,26 @@ class WebhookTweeterHandlerTest extends TestCase
 			'request' => $baseRequestWithoutSignature,
 			'expected' => $successResult,
 		];
+
+		$configWithStringable = new WebhookTweeterConfig(new class implements Stringable {
+			public function __toString(): string
+			{
+				return '/webhook';
+			}
+		});
+
+		yield [
+			'config' => $configWithStringable,
+			'renderer' => $renderer,
+			'templateLocator' => $templateLocator,
+			'twitter' => $twitter,
+			'request' => $baseRequestWithoutSignature,
+			'expected' => $successResult,
+		];
 	}
 
 	/**
 	 * @dataProvider requestProvider
-	 * @throws JsonException
 	 */
 	public function testHandle(
 		WebhookTweeterConfig $config,
@@ -203,5 +235,21 @@ class WebhookTweeterHandlerTest extends TestCase
 		static::assertEquals($expected->message, $result->message);
 		static::assertEquals($expected->url, $result->url);
 		static::assertEquals($expected->tweet, $result->tweet);
+	}
+
+	public function testSimpleLocatorThrowsForNoTemplate(): void
+	{
+		$locator = new SimpleWebhookTweeterTemplateLocator(__DIR__ . '/templates');
+
+		$testTemplate = $locator->getMatchingTemplate('test');
+		static::assertInstanceOf(WebhookTweeterTemplate::class, $testTemplate);
+		static::assertEquals("This is a test template.\n", $testTemplate->getContents());
+
+		$invalidTemplate = $locator->getMatchingTemplate('invalid');
+		static::assertNull($invalidTemplate);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("No default template available");
+		$locator->getDefaultTemplate();
 	}
 }

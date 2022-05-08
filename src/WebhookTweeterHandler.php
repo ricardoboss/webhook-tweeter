@@ -37,7 +37,7 @@ class WebhookTweeterHandler
 		}
 
 		$path = $request->getUri()->getPath();
-		if ($path !== $this->config->webhookPath) {
+		if ($path !== (string) $this->config->webhookPath) {
 			return new WebhookTweeterResult(false, "Invalid request path: $path", null, null);
 		}
 
@@ -77,7 +77,7 @@ class WebhookTweeterHandler
 
 		$signature = substr($signature, strlen(self::SignatureAlgorithm) + 1);
 
-		$hash = hash_hmac(self::SignatureAlgorithm, $body, $this->config->webhookSecret);
+		$hash = hash_hmac(self::SignatureAlgorithm, $body, (string) $this->config->webhookSecret);
 
 		return hash_equals($hash, $signature);
 	}
