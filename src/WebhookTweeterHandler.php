@@ -20,10 +20,6 @@ class WebhookTweeterHandler
 	{
 	}
 
-	/**
-	 * @param RequestInterface $request
-	 * @return WebhookTweeterResult
-	 */
 	public function handle(RequestInterface $request): WebhookTweeterResult
 	{
 		$method = $request->getMethod();
