@@ -5,7 +5,7 @@ namespace ricardoboss\WebhookTweeter;
 
 interface WebhookTweeterTemplateLocator
 {
-	public function getMatchingTemplate(string $type): ?WebhookTweeterTemplate;
+	public function getMatchingTemplate(array $data): ?WebhookTweeterTemplate;
 
 	public function getDefaultTemplate(): WebhookTweeterTemplate;
 }

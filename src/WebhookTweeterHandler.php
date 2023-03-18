@@ -6,8 +6,7 @@ namespace ricardoboss\WebhookTweeter;
 use JsonException;
 use Psr\Http\Message\RequestInterface;
 
-class WebhookTweeterHandler
-{
+class WebhookTweeterHandler {
 	public const SignatureHeader = 'X-Hub-Signature-256';
 	public const SignatureAlgorithm = 'sha256';
 
@@ -16,52 +15,56 @@ class WebhookTweeterHandler
 		private readonly WebhookTweeterRenderer $renderer,
 		private readonly WebhookTweeterTemplateLocator $templateLocator,
 		private readonly WebhookTweeterTwitterAPI $twitter,
-	)
-	{
-	}
+	) {}
 
-	public function handle(RequestInterface $request): WebhookTweeterResult
-	{
-		$method = $request->getMethod();
-		if ($method !== 'POST') {
-			return new WebhookTweeterResult(false, "Invalid request method: $method", null, null);
-		}
-
-		$contentType = $request->getHeaderLine('Content-Type');
-		if ($contentType !== 'application/json') {
-			return new WebhookTweeterResult(false, "Invalid request content type: $contentType", null, null);
-		}
-
-		$path = $request->getUri()->getPath();
-		if ($path !== (string) $this->config->webhookPath) {
-			return new WebhookTweeterResult(false, "Invalid request path: $path", null, null);
+	public function handle(RequestInterface $request): WebhookTweeterResult {
+		$result = $this->verifyRequestHeaders($request);
+		if ($result !== null) {
+			return $result;
 		}
 
 		$body = $request->getBody()->getContents();
 
 		if (!$this->verifySignature($request, $body)) {
-			return new WebhookTweeterResult(false, 'Invalid request signature', null, null);
+			return WebhookTweeterResult::failure('Invalid request signature');
 		}
 
 		try {
 			$payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
 		} catch (JsonException $e) {
-			return new WebhookTweeterResult(false, "Invalid request payload: " . $e->getMessage(), null, null);
-		}
-
-		if (!isset($payload['event'])) {
-			return new WebhookTweeterResult(false, "Missing 'event' key in payload", null, null);
+			return WebhookTweeterResult::failure("Invalid request payload: " . $e->getMessage());
 		}
 
 		$renderedTemplate = $this->renderTemplate($payload);
 		$tweet = $this->twitter->sendTweet($renderedTemplate);
-		$url = $this->getTweetUrl($tweet);
+		$url = $this->twitter->getTweetUrl($tweet);
 
-		return new WebhookTweeterResult(true, null, $url, $tweet);
+		return WebhookTweeterResult::success($url, $tweet);
 	}
 
-	private function verifySignature(RequestInterface $request, string $body): bool
-	{
+	private function verifyRequestHeaders(RequestInterface $request): ?WebhookTweeterResult {
+		$method = $request->getMethod();
+		if ($method !== 'POST') {
+			return WebhookTweeterResult::failure("Invalid request method: $method");
+		}
+
+		if ($this->config->webhookPath !== null) {
+			$webhookPath = (string) $this->config->webhookPath;
+			$actualPath = $request->getUri()->getPath();
+			if ($actualPath !== $webhookPath) {
+				return WebhookTweeterResult::failure("Invalid request path: $actualPath");
+			}
+		}
+
+		$contentType = $request->getHeaderLine('Content-Type');
+		if ($contentType !== 'application/json') {
+			return WebhookTweeterResult::failure("Invalid request content type: $contentType");
+		}
+
+		return null;
+	}
+
+	private function verifySignature(RequestInterface $request, string $body): bool {
 		if ($this->config->webhookSecret === null) {
 			return true;
 		}
@@ -78,15 +81,9 @@ class WebhookTweeterHandler
 		return hash_equals($hash, $signature);
 	}
 
-	private function renderTemplate(array $payload): string
-	{
-		$template = $this->templateLocator->getMatchingTemplate($payload['event']) ?? $this->templateLocator->getDefaultTemplate();
+	private function renderTemplate(array $data): string {
+		$template = $this->templateLocator->getMatchingTemplate($data) ?? $this->templateLocator->getDefaultTemplate();
 
-		return $this->renderer->render($template, $payload);
-	}
-
-	private function getTweetUrl(object $tweet): string
-	{
-		return sprintf('https://twitter.com/%s/status/%s', $tweet->user->screen_name, $tweet->data->id);
+		return $this->renderer->render($template, $data);
 	}
 }

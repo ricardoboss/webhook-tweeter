@@ -5,12 +5,9 @@ namespace ricardoboss\WebhookTweeter;
 
 use Stringable;
 
-class WebhookTweeterConfig
-{
+class WebhookTweeterConfig {
 	public function __construct(
-		public string|Stringable $webhookPath,
-		public string|Stringable|null $webhookSecret = null,
-	)
-	{
-	}
+		public readonly string|Stringable|null $webhookPath = null,
+		public readonly string|Stringable|null $webhookSecret = null,
+	) {}
 }

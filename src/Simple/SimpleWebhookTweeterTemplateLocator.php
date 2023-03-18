@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace ricardoboss\WebhookTweeter\Simple;
 
+use InvalidArgumentException;
 use ricardoboss\WebhookTweeter\WebhookTweeterTemplate;
 use ricardoboss\WebhookTweeter\WebhookTweeterTemplateLocator;
 use RuntimeException;
@@ -16,9 +17,15 @@ class SimpleWebhookTweeterTemplateLocator implements WebhookTweeterTemplateLocat
 	{
 	}
 
-	public function getMatchingTemplate(string $type): ?WebhookTweeterTemplate
+	public function getMatchingTemplate(array $data): ?WebhookTweeterTemplate
 	{
-		$templateFile = $this->templatesDirectory . '/' . $type . $this->templateExtension;
+		if (!isset($data['event'])) {
+			throw new InvalidArgumentException("Missing 'event' key in payload");
+		}
+
+		$event = $data['event'];
+
+		$templateFile = $this->templatesDirectory . '/' . $event . $this->templateExtension;
 
 		if (!file_exists($templateFile)) {
 			return null;
